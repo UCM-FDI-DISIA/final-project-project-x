@@ -10,14 +10,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
 public class HighScoresView {
 
     private final AppContext ctx;
-    private final BorderPane root = new BorderPane();
+    private final StackPane root = new StackPane();
 
     public HighScoresView(AppContext ctx) {
         this.ctx = ctx;
@@ -52,23 +50,21 @@ public class HighScoresView {
         TableColumn<HighScore, Double> percCol = new TableColumn<>("Percentage");
         percCol.setCellValueFactory(new PropertyValueFactory<>("percentage"));
 
-        TableColumn<HighScore, java.time.LocalDateTime> timeCol = new TableColumn<>("When");
-        timeCol.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
-
-        table.getColumns().addAll(nameCol, catCol, diffCol, correctCol, totalCol, percCol, timeCol);
+        table.getColumns().addAll(nameCol, catCol, diffCol, correctCol, totalCol, percCol);
 
         Button backBtn = new Button("Back to Menu");
         backBtn.setOnAction(e -> Nav.goToMainMenu(ctx));
 
         HBox bottom = new HBox(backBtn);
         bottom.setAlignment(Pos.CENTER_RIGHT);
-        bottom.setPadding(new Insets(10));
+        bottom.setPadding(new Insets(10, 0, 0, 0));
 
-        VBox center = new VBox(10, UI.h1("High Scores"), table);
-        center.setPadding(new Insets(20));
+        VBox card = new VBox(12, UI.h1("High Scores"), table, bottom);
+        card.getStyleClass().add("card");
+        card.setPadding(new Insets(18));
+        card.setMaxWidth(760);
 
-        root.setCenter(center);
-        root.setBottom(bottom);
-        BorderPane.setMargin(center, new Insets(20));
+        root.getChildren().add(card);
+        StackPane.setAlignment(card, Pos.CENTER);
     }
 }

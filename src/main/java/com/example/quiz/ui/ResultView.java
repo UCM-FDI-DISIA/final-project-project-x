@@ -6,9 +6,7 @@ import com.example.quiz.model.QuizSession;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 import java.time.LocalDateTime;
@@ -16,7 +14,7 @@ import java.time.LocalDateTime;
 public class ResultView {
 
     private final AppContext ctx;
-    private final BorderPane root = new BorderPane();
+    private final StackPane root = new StackPane();
 
     public ResultView(AppContext ctx) {
         this.ctx = ctx;
@@ -38,16 +36,24 @@ public class ResultView {
         int total = session.getTotalQuestions();
         double percentage = total == 0 ? 0.0 : (correct * 100.0 / total);
 
+        VBox card = new VBox(14);
+        card.getStyleClass().add("card");
+        card.setMaxWidth(480);
+        card.setPadding(new Insets(20));
+
         Label title = UI.h1("Quiz Results");
         Label scoreLabel = new Label("Score: " + correct + " / " + total);
         Label percentLabel = new Label(String.format("Percentage: %.1f%%", percentage));
         Label msgLabel = new Label(getMessage(percentage));
+        msgLabel.getStyleClass().add("h2");
+        msgLabel.setWrapText(true);
 
-        // Enter name for high score
-        Label nameLabel = new Label("Your name (optional, for high scores):");
+        Label nameLabel = new Label("Your name (for high scores):");
         TextField nameField = new TextField();
+        nameField.setPromptText("Enter your name");
 
         Button saveAndMenu = new Button("Save & Back to Menu");
+        saveAndMenu.getStyleClass().add("primary-button");
         Button playAgain = new Button("Play Again");
         Button justMenu = new Button("Back to Menu");
 
@@ -68,7 +74,6 @@ public class ResultView {
         });
 
         playAgain.setOnAction(e -> {
-            // Start a new session with same settings
             var questions = ctx.questionRepo.getQuestions(
                     ctx.currentCategory, ctx.currentDifficulty, ctx.numberOfQuestions
             );
@@ -81,20 +86,20 @@ public class ResultView {
         HBox buttons = new HBox(10, saveAndMenu, playAgain, justMenu);
         buttons.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox center = new VBox(10,
-                title,
-                scoreLabel,
-                percentLabel,
-                msgLabel,
-                nameLabel,
-                nameField,
-                buttons
+        card.getChildren().addAll(
+            title,
+            new Label("Category: " + ctx.currentCategory + " · " + ctx.currentDifficulty),
+            scoreLabel,
+            percentLabel,
+            msgLabel,
+            new Separator(),        // <-- needs import
+            nameLabel,
+            nameField,
+            buttons
         );
-        center.setPadding(new Insets(20));
-        center.setAlignment(Pos.TOP_LEFT);
 
-        root.setCenter(center);
-        BorderPane.setMargin(center, new Insets(40));
+        root.getChildren().add(card);
+        StackPane.setAlignment(card, Pos.CENTER);
     }
 
     private String getMessage(double percentage) {

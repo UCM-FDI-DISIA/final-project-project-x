@@ -7,21 +7,17 @@ import com.example.quiz.model.QuizSession;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 
 import java.util.List;
 
 public class MainMenuView {
 
     private final AppContext ctx;
-    private final BorderPane root = new BorderPane();
+    private final StackPane root = new StackPane();
 
     public MainMenuView(AppContext ctx) {
         this.ctx = ctx;
@@ -33,8 +29,32 @@ public class MainMenuView {
     }
 
     private void build() {
-        // Title
-        Label title = UI.title("Quiz Trivia Game");
+        // Card container
+        VBox card = new VBox(18);
+        card.getStyleClass().add("card");
+        card.setMaxWidth(420);
+
+        // 🔹 Logo
+        ImageView logoView = null;
+        var logoUrl = getClass().getResource("/images/logo.png");
+        if (logoUrl != null) {
+            logoView = new ImageView(new Image(logoUrl.toExternalForm()));
+            logoView.setFitHeight(40);
+            logoView.setPreserveRatio(true);
+        }
+
+        // Title & subtitle
+        Label title = UI.title("Quiz Trivia");
+        Label subtitle = new Label("Pick a setup and test your brain.");
+        subtitle.getStyleClass().add("h2");
+
+        // Header: logo + title in a row
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+        if (logoView != null) {
+            header.getChildren().add(logoView);
+        }
+        header.getChildren().add(title);
 
         // Category selection
         Label catLabel = new Label("Category");
@@ -52,9 +72,11 @@ public class MainMenuView {
         Label numLabel = new Label("Number of questions");
         Spinner<Integer> numSpinner = new Spinner<>();
         numSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(3, 20, ctx.numberOfQuestions));
+        numSpinner.setMaxWidth(120);
 
         // Buttons
-        Button playBtn = new Button("Play");
+        Button playBtn = new Button("Play ▶");
+        playBtn.getStyleClass().add("primary-button");
         Button highScoresBtn = new Button("High Scores");
 
         playBtn.setOnAction(e -> {
@@ -69,7 +91,7 @@ public class MainMenuView {
             );
 
             if (questions.isEmpty()) {
-                // Very simple feedback – you can later replace with nicer dialog
+                // Basic feedback for now
                 System.out.println("Not enough questions for this category/difficulty.");
                 return;
             }
@@ -81,19 +103,20 @@ public class MainMenuView {
         highScoresBtn.setOnAction(e -> Nav.goToHighScores(ctx));
 
         HBox buttons = new HBox(10, playBtn, highScoresBtn);
-        buttons.setAlignment(Pos.CENTER);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox center = new VBox(15,
-                title,
+        card.getChildren().addAll(
+                header,
+                subtitle,
+                new Separator(),
                 catLabel, categoryBox,
                 diffLabel, difficultyBox,
                 numLabel, numSpinner,
                 buttons
         );
-        center.setPadding(new Insets(20));
-        center.setAlignment(Pos.TOP_LEFT);
+        card.setPadding(new Insets(22));
 
-        root.setCenter(center);
-        BorderPane.setMargin(center, new Insets(40));
+        root.getChildren().add(card);
+        StackPane.setAlignment(card, Pos.CENTER);
     }
 }

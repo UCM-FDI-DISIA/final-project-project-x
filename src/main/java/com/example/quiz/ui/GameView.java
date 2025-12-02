@@ -16,11 +16,12 @@ import java.util.List;
 public class GameView {
 
     private final AppContext ctx;
-    private final BorderPane root = new BorderPane();
+    private final StackPane root = new StackPane();
 
     private Label questionLabel;
     private Label progressLabel;
     private Label scoreLabel;
+    private Label categoryLabel;
     private final List<Button> answerButtons = new ArrayList<>();
     private Button nextButton;
 
@@ -38,23 +39,33 @@ public class GameView {
     private void build() {
         QuizSession session = ctx.currentSession;
         if (session == null || session.getTotalQuestions() == 0) {
-            // If somehow no session exists, go back to menu
             Nav.goToMainMenu(ctx);
             return;
         }
 
-        // Top bar: category + difficulty + progress
-        Label infoLabel = new Label("Category: " + ctx.currentCategory +
-                "   ·   Difficulty: " + ctx.currentDifficulty);
-        progressLabel = new Label();
-        scoreLabel = new Label();
+        // Card container
+        VBox card = new VBox(18);
+        card.getStyleClass().add("card");
+        card.setMaxWidth(700);
 
-        HBox top = new HBox(20, infoLabel, progressLabel);
-        top.setAlignment(Pos.CENTER_LEFT);
-        HBox right = new HBox(scoreLabel);
-        right.setAlignment(Pos.CENTER_RIGHT);
-        HBox topBar = new HBox(20, top, UI.spacer(), right);
-        topBar.setPadding(new Insets(10));
+        // Top bar: category + difficulty + progress + score
+        categoryLabel = new Label(ctx.currentCategory + " · " + ctx.currentDifficulty);
+        categoryLabel.getStyleClass().add("pill");
+
+        progressLabel = new Label();
+        progressLabel.getStyleClass().addAll("pill", "pill-strong");
+
+        scoreLabel = new Label();
+        scoreLabel.getStyleClass().add("pill");
+
+        HBox topLeft = new HBox(8, categoryLabel);
+        HBox topRight = new HBox(8, progressLabel, scoreLabel);
+        topLeft.setAlignment(Pos.CENTER_LEFT);
+        topRight.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox topBarInner = new HBox(10, topLeft, UI.spacer(), topRight);
+        topBarInner.setAlignment(Pos.CENTER);
+        topBarInner.getStyleClass().add("top-bar");
 
         // Question text
         questionLabel = new Label();
@@ -75,8 +86,10 @@ public class GameView {
         answersBox.setFillWidth(true);
 
         // Bottom controls
-        nextButton = new Button("Next");
+        nextButton = new Button("Next →");
+        nextButton.getStyleClass().add("primary-button");
         Button quitButton = new Button("Quit");
+
         nextButton.setDisable(true);
 
         nextButton.setOnAction(e -> goNext());
@@ -84,15 +97,17 @@ public class GameView {
 
         HBox bottomBar = new HBox(10, quitButton, nextButton);
         bottomBar.setAlignment(Pos.CENTER_RIGHT);
-        bottomBar.setPadding(new Insets(10));
 
-        VBox center = new VBox(20, questionLabel, answersBox);
-        center.setPadding(new Insets(20));
-        center.setAlignment(Pos.TOP_LEFT);
+        card.getChildren().addAll(
+                topBarInner,
+                questionLabel,
+                answersBox,
+                bottomBar
+        );
+        card.setPadding(new Insets(18));
 
-        root.setTop(topBar);
-        root.setCenter(center);
-        root.setBottom(bottomBar);
+        root.getChildren().add(card);
+        StackPane.setAlignment(card, Pos.CENTER);
 
         refreshUI();
     }
@@ -123,7 +138,7 @@ public class GameView {
         }
 
         int currentIndex1Based = session.getCurrentIndex() + 1;
-        progressLabel.setText("Question " + currentIndex1Based + "/" + session.getTotalQuestions());
+        progressLabel.setText("Q " + currentIndex1Based + "/" + session.getTotalQuestions());
         scoreLabel.setText("Score: " + session.getCorrectCount());
     }
 
@@ -138,7 +153,6 @@ public class GameView {
         boolean correct = (selectedIndex == correctIndex);
         session.recordAnswer(correct);
 
-        // Update button styles
         for (int i = 0; i < answerButtons.size(); i++) {
             Button b = answerButtons.get(i);
             if (i == correctIndex) {

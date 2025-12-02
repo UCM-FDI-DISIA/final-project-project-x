@@ -6,6 +6,7 @@ import com.example.quiz.service.QuestionRepository;
 import com.example.quiz.ui.MainMenuView;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -30,6 +31,13 @@ public class MainApp extends Application {
         scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
 
         stage.setTitle("Quiz Trivia Game");
+
+        // 🔹 Set window icon from logo.png (if present)
+        var iconUrl = getClass().getResource("/images/logo.png");
+        if (iconUrl != null) {
+            stage.getIcons().add(new Image(iconUrl.toExternalForm()));
+        }
+
         stage.setScene(scene);
 
         // Expose this app instance so Nav can get to it if needed
