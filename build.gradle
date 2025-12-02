@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.example.quiz'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JavaFX (Mac / Apple Silicon – adjust classifier if needed)
+    def javafxVersion = '21.0.3'
+    implementation "org.openjfx:javafx-controls:${javafxVersion}:mac-aarch64"
+    implementation "org.openjfx:javafx-graphics:${javafxVersion}:mac-aarch64"
+    implementation "org.openjfx:javafx-base:${javafxVersion}:mac-aarch64"
+}
+
+application {
+    mainClass = 'com.example.quiz.MainApp'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+run {
+    // If this ever breaks due to -XstartOnFirstThread like last time,
+    // just remove it again :)
+    jvmArgs = [
+            '--module-path', configurations.runtimeClasspath.asPath,
+            '--add-modules', 'javafx.controls,javafx.graphics,javafx.base'
+    ]
+}
